@@ -56,7 +56,6 @@ circles c = Animation $ \x ->
   where
     xs = grid InnerPos (Range 0 1) (c ^. #numGlyphs)
     power x = (c ^. #nx) * x
-    thrift x = sphere $ (c ^. #ny) * x
 
 -- | serveSend (defaultSConfig & #frameRate .~ 1000) frameStamp
 serveSend :: SConfig -> Animation -> IO ()
