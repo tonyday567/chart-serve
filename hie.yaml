@@ -1,0 +1,8 @@
+cradle:
+  stack:
+    - path: "./app/chart-serve.hs"
+      component: "chart-serve:exe:chart-serve"
+    - path: "./src"
+      component: "chart-serve:lib"
+    - path: "./test/chart-serve.hs"
+      component: "chart-serve:test:chart-serve"
