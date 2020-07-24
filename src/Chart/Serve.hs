@@ -16,12 +16,21 @@ import Control.Lens
 
 data SConfig =
   SConfig
-  { frameRate :: Double,
-    maxTime :: Double,
-    nx :: Double,
-    ny :: Double,
-    numGlyphs :: Int
+  { framerate :: Double,
+    runime :: Double,
+    s1 :: Double,
+    s2 :: Double,
+    numglyphs :: Int
   } deriving (Eq, Show, Generic)
+
+repSConfig :: (Monad m) => SConfig -> SharedRep m SConfig
+repSConfig s = do
+  fr <- fromIntegral <$> sliderI (Just "framerate") 1 200 1 1 (floor $ s ^. #framerate)
+  mt <- slider (Just "runtime") 0 1 0.1 (s ^. #runtime)
+  s1' <- slider (Just "s1") 0 1 0.1 (s ^. #s1)
+  s2' <- slider (Just "s2") 0 1 0.1 (s ^. #s2)
+  ng <- sliderI (Just "glyphs") 1 200 1 1 (s ^. #numglyphs)
+  pure $ SCConfig fr rt s1' s2' ng
 
 totalFrames :: SConfig -> Int
 totalFrames cfg = floor $ frameRate cfg * maxTime cfg
@@ -30,8 +39,9 @@ defaultSConfig :: SConfig
 defaultSConfig = SConfig 20 10 1 1 100
 
 run :: SConfig -> IO ()
-run c =
-  serveSend c $ mconcat $
+run c = serveSend c (defaultAnimation c)
+
+defaultAnimation c = mconcat $
     [ circle,
       circles c,
       frameStamp,
@@ -96,6 +106,8 @@ line (Point fx fy) c =
     xs = grid InnerPos (Range 0 1) (c ^. #numGlyphs)
 
 -- * wranglers
+-- svgs <- runCont $ toListE <$> chartEmitter defaultSConfig (defaultAnimation defaultSConfig)
+-- zipWithM_ (\x svg -> writeFile ("other/" <> show x <> ".svg") svg) [1..199] svgs
 chartEmitter :: SConfig -> Animation -> Cont IO (Emitter IO Text)
 chartEmitter c ani =
   fmap (outputText ani) <$> carousel c
